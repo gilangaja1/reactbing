@@ -24,7 +24,7 @@ const App = () => {
     const [currentSlide, setCurrentSlide] = useState(0);
     const [previousSlideIndex, setPreviousSlideIndex] = useState(0);
     const [theme, setTheme] = useState('light'); // 'light' or 'dark'
-    const [slideDimensions, setSlideDimensions] = useState({ width: 0, height: 0 });
+    // const [slideDimensions, setSlideDimensions] = useState({ width: 0, height: 0 }); // Tidak terpakai, bisa dihapus
 
     // Refs for DOM elements
     const slidesContainerRef = useRef(null);
@@ -32,7 +32,6 @@ const App = () => {
     const slideRefs = useRef([]); // To store refs for each slide
 
     // Slides data (extracted from HTML)
-    // In a real app, this might come from an API or a separate data file
     const slidesData = [
         {
             id: 'slide-1',
@@ -57,7 +56,6 @@ const App = () => {
                 <div className="slide-content">
                     <h1 className="staggered-item">Our Team</h1>
                     <div className="team-members-container">
-                        {/* Team members would be mapped here */}
                         <div className="team-member staggered-item" style={{ animationDelay: '0.2s' }}>
                             <img src="ningrat.jpeg" alt="Foto Anggota 1" className="member-photo" onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/150x150/EBF2F7/333?text=Image+Not+Found&font=roboto'; }} />
                             <p className="member-name">Bagus Nigrat Fajra Miracle (8)</p>
@@ -542,7 +540,7 @@ const App = () => {
         });
         
         const currentActiveSlideEl = slideRefs.current[currentSlide];
-        const oldActiveSlideEl = slideRefs.current[previousSlideIndex];
+        // const oldActiveSlideEl = slideRefs.current[previousSlideIndex]; // Tidak terpakai secara langsung di blok ini
 
         if (currentActiveSlideEl) {
             if (previousSlideIndex === currentSlide && !currentActiveSlideEl.classList.contains('active')) {
@@ -658,22 +656,19 @@ const App = () => {
         const handleResize = () => {
             if (slidesContainerRef.current && slideRefs.current.length > 0) {
                 // Recalculate slide container width and individual slide widths
-                const containerWidth = slidesContainerRef.current.parentElement.offsetWidth;
-                slidesContainerRef.current.style.width = `${totalSlides * 100}%`; // Container holds all slides side-by-side
+                // const containerWidth = slidesContainerRef.current.parentElement.offsetWidth; // Tidak terpakai secara langsung
+                slidesContainerRef.current.style.width = `${totalSlides * 100}%`;
                 
                 slideRefs.current.forEach(slideEl => {
                     if (slideEl) {
-                         // Each slide takes full viewport width, but is part of the wider container
                         slideEl.style.width = `${100 / totalSlides}%`;
                     }
                 });
                 
-                // Adjust transform without animation during resize
                 const originalTransition = slidesContainerRef.current.style.transition;
                 slidesContainerRef.current.style.transition = 'none';
                 slidesContainerRef.current.style.transform = `translateX(-${currentSlide * (100 / totalSlides)}%)`;
                 
-                // Restore transition after a short delay
                 setTimeout(() => {
                     if(slidesContainerRef.current) slidesContainerRef.current.style.transition = originalTransition;
                 }, 50);
@@ -687,7 +682,6 @@ const App = () => {
         };
 
         window.addEventListener('resize', debouncedHandleResize);
-        // Initial call to set dimensions
         handleResize(); 
 
         return () => {
@@ -697,31 +691,26 @@ const App = () => {
     }, [totalSlides, currentSlide]);
 
 
-    // Effect for initial setup, similar to DOMContentLoaded
+    // Effect for initial setup
     useEffect(() => {
-        // Set initial slide to active without complex animation logic for the very first render
         const initialActiveSlide = slideRefs.current[0];
         if (initialActiveSlide && !initialActiveSlide.classList.contains('active')) {
             initialActiveSlide.classList.add('active');
             initialActiveSlide.setAttribute('aria-hidden', 'false');
             initialActiveSlide.setAttribute('tabindex', '-1');
-            resetAnimations(initialActiveSlide); // Reset before animating
-            setTimeout(() => { // Delay to ensure DOM is ready
+            resetAnimations(initialActiveSlide); 
+            setTimeout(() => { 
                 animateStaggeredItems(initialActiveSlide);
             }, 50);
         }
-        updateColorRGBVariables(); // Ensure colors are set on load
+        updateColorRGBVariables();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []); // Empty dependency array means this runs once on mount
+    }, []); 
 
 
     return (
         <>
-            {/* Embedding CSS directly. For larger apps, consider CSS Modules or styled-components. */}
             <style>{`
-                /* Paste all content from style.css here */
-                /* IMPORTANT: Ensure all font URLs and other external resources are accessible */
-                /* Or use @import for Google Fonts if not using link tag in HTML head */
                 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Roboto:wght@400;500&family=Pacifico&display=swap');
 
                 :root {
@@ -750,7 +739,7 @@ const App = () => {
                     --shadow-color-rgb: 0,0,0;
                 }
 
-                .dark-theme { /* Applied to body tag by useEffect */
+                .dark-theme {
                     --primary-color: #58A6FF;
                     --secondary-color: #39D3BB;
                     --accent-color: #F8C555;
@@ -774,15 +763,16 @@ const App = () => {
                     box-sizing: border-box;
                 }
 
-                html, body { /* body class is managed by React for theme */
+                html { /* PERBAIKAN: Hapus overflow: hidden dari html dan body jika ada */
                     height: 100%;
                     width: 100%;
-                    margin: 0;
-                    padding: 0;
-                    overflow: hidden;
                 }
-
-                body {
+                body { 
+                    height: 100%;
+                    width: 100%;
+                    margin: 0; /* Pastikan margin body adalah 0 */
+                    padding: 0; /* Pastikan padding body adalah 0 */
+                    /* overflow: hidden; */ /* PERBAIKAN: Baris ini dihapus/dikomentari untuk memungkinkan scroll pada slide */
                     font-family: var(--font-body);
                     background-color: var(--bg-color);
                     background-image: linear-gradient(145deg, var(--bg-color) 0%, var(--bg-color-light-shade) 100%);
@@ -791,8 +781,14 @@ const App = () => {
                     -webkit-font-smoothing: antialiased;
                     -moz-osx-font-smoothing: grayscale;
                     font-size: 16px;
-                    padding-top: 10px;
+                    padding-top: 10px; /* Padding untuk progress bar */
                 }
+                
+                /* Pastikan #root atau container utama React juga memiliki tinggi 100% */
+                #root { /* Atau nama ID root div Anda */
+                    height: 100%;
+                }
+
 
                 .progress-bar-container {
                     position: fixed;
@@ -822,9 +818,9 @@ const App = () => {
 
                 .presentation-container {
                     width: 100%;
-                    height: calc(100% - 10px);
+                    height: calc(100% - 10px); /* Tinggi dikurangi progress bar */
                     position: relative;
-                    overflow: hidden;
+                    overflow: hidden; /* Ini penting untuk efek transisi slide horizontal */
                     perspective: 1800px;
                 }
 
@@ -836,14 +832,14 @@ const App = () => {
                 }
 
                 .slide {
-                    height: 100%;
-                    padding: 2rem 1.5rem 9rem 1.5rem;
+                    height: 100%; /* Setiap slide mengisi tinggi container */
+                    padding: 2rem 1.5rem 9rem 1.5rem; /* Padding bawah untuk ruang tombol navigasi */
                     display: flex;
                     flex-direction: column;
                     justify-content: flex-start;
                     align-items: center;
                     position: relative;
-                    overflow-y: auto;
+                    overflow-y: auto; /* PERBAIKAN: Ini memungkinkan slide individual untuk scroll jika kontennya panjang */
                     background: transparent;
                     backface-visibility: hidden;
                     transform-origin: center center;
@@ -851,7 +847,6 @@ const App = () => {
                                 opacity var(--transition-speed-normal) ease-in-out;
                     opacity: 0;
                     transform: scale(0.95) rotateY(0deg);
-                    /* width is set by JS based on totalSlides */
                 }
 
                 .slide.prepare-flip-right {
@@ -877,9 +872,9 @@ const App = () => {
                     border-radius: var(--border-radius-md);
                     padding: 2.5rem 3rem;
                     margin-top: 1rem;
-                    margin-bottom: 2.5rem;
+                    margin-bottom: 2.5rem; 
                     box-shadow: 0 20px 50px -10px rgba(var(--shadow-color-rgb), 0.12), 0 0 35px -15px rgba(var(--primary-color-rgb), 0.1);
-                    opacity: 0; /* Initial state for content animation */
+                    opacity: 0; 
                     transform: translateY(80px) scale(0.9) perspective(1000px) rotateX(-12deg);
                     transform-origin: bottom center;
                     transition: opacity var(--transition-speed-normal) cubic-bezier(0.23, 1, 0.32, 1) 0.1s,
@@ -888,7 +883,7 @@ const App = () => {
                     border: 1px solid rgba(var(--text-color-rgb), 0.07);
                 }
 
-                .slide.active .slide-content { /* This triggers when slide becomes active, for content animation */
+                .slide.active .slide-content { 
                     opacity: 1;
                     transform: translateY(0) scale(1) perspective(1000px) rotateX(0deg);
                     box-shadow: 0 25px 65px -12px rgba(var(--shadow-color-rgb), 0.2), 0 0 40px -20px rgba(var(--primary-color-rgb), 0.15);
@@ -934,9 +929,9 @@ const App = () => {
                     padding-bottom: 0.8rem;
                 }
                 
-                h3 { /* Added basic h3 styling based on context */
+                h3 { 
                     font-family: var(--font-heading);
-                    color: var(--accent-color); /* Or primary, depending on usage */
+                    color: var(--accent-color); 
                     margin-top: 1.5rem;
                     margin-bottom: 0.8rem;
                     font-size: clamp(1.2rem, 3.5vw, 1.45rem);
@@ -1129,7 +1124,7 @@ const App = () => {
                 }
 
                 .staggered-item {
-                    opacity: 0; /* Initial state handled by JS for animation */
+                    opacity: 0; 
                 }
 
                 .welcome-text {
@@ -1207,7 +1202,7 @@ const App = () => {
                 .animate-example p {
                     position: relative;
                     z-index: 1;
-                    opacity: 0; /* Initial state for JS animation */
+                    opacity: 0; 
                 }
 
                 .analytical-feature {
@@ -1265,7 +1260,7 @@ const App = () => {
                     width: 100%;
                 }
 
-                .feature-content h3 { /* Already styled above, this can be merged or removed if redundant */
+                .feature-content h3 { 
                     font-family: var(--font-heading);
                     color: var(--accent-color);
                     margin-top: 0;
@@ -1418,7 +1413,7 @@ const App = () => {
                     background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color), var(--primary-color));
                     -webkit-background-clip: text;
                     -webkit-text-fill-color: transparent;
-                    background-clip: text; /* Standard property */
+                    background-clip: text; 
                     background-size: 400% 100%;
                 }
 
@@ -1522,18 +1517,10 @@ const App = () => {
                             key={slide.id}
                             ref={el => slideRefs.current[index] = el}
                             aria-hidden={index !== currentSlide}
-                            tabIndex={index === currentSlide ? -1 : undefined}
+                            tabIndex={index === currentSlide ? -1 : undefined} // Menggunakan undefined agar atribut tidak dirender jika false
                         >
-                            {/* Special handling for welcome slide topic clicks */}
                             {slide.id === 'slide-1' ? 
                                 React.cloneElement(slide.content, {
-                                    // Find ul.welcome-topics and attach onClick to its li children
-                                    // This is a bit more complex in React than direct DOM manipulation
-                                    // A better approach would be to make welcome-topics a component
-                                    // For now, we'll modify the JSX directly if possible, or rely on event delegation if needed.
-                                    // The original JS uses querySelectorAll on .welcome-topics li.
-                                    // We can pass the handler down to the li elements.
-                                    // Modifying the slideData for slide-1 to include the handler:
                                     children: React.Children.map(slide.content.props.children, child => {
                                         if (child && child.type === 'ul' && child.props.className === 'welcome-topics') {
                                             return React.cloneElement(child, {
